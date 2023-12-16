@@ -21,22 +21,18 @@
  * 
  * @return the result of the calculation
 */
-uint8_t compute_crc8(uint8_t data, uint16_t poly) { 
-   uint16_t result; // Result of our CRC calculation will be stored here
-   
-   // Apennd 8 bits to end of data
-   uint16_t apnd_data = (uint16_t)data << 8 | 0x00;
-   uint16_t ext_poly = (uint16_t)poly << 7;
+uint8_t compute_crc8(uint8_t data, uint8_t poly) { 
+   uint8_t crc = data; // Crc register 
 
-   // Line up the begining of the poly and begin XOR operations and shifting 1 bit to the right
-   for(int i = 0; i < 4; i++) { 
-      result = apnd_data^ext_poly;
-      printf("%x ^ %x = %x\n", apnd_data, ext_poly, result);
-      apnd_data = result << (7-i);
-      ext_poly = ext_poly >> 1;
+   for (int i = 0; i < 8; i++) { 
+      if ((crc & 0x80) != 0) { 
+         crc = (uint8_t)((crc << 1)^poly);
+      } else
+         crc = crc << 1;
+      printf("0x%x\n", crc);
    }
 
-   return data;
+   return crc;
 
 }
 
@@ -56,14 +52,15 @@ int crc8_verf(uint8_t data, uint8_t result) {
 
 int main() {
    uint8_t in_data = 0xC2;      // Input data
-   uint16_t poly = 0b100011101; // CRC-8 polynomial
+   uint16_t poly = 0b00011101; // CRC-8 polynomial
 
    // Calculate the crc computation 
    printf("Calculate 0x%x with poly 0x%x...\n", in_data, poly);
    uint8_t result = compute_crc8(in_data, poly);
 
+   printf("Result: 0x%x\n", result);
    // Do crc verification
-   printf("Performing CRC verification using result 0x%x::STATUS::%s\n", result, crc8_verf(in_data, result) ? "PASSED" :"FAILED");
+   //printf("Performing CRC verification using 0x%x::STATUS::%s\n", result, crc8_verf(in_data, result) ? "PASSED" :"FAILED");
 
 	return 0;   
 }
